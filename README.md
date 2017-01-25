@@ -35,8 +35,8 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -o OUTPUT, --output OUTPUT
-                        Filename where the tinified output should bestored.
-                        Defaults to inputfile with ".tiny"inserted before the
+                        Filename where the tinified output should be stored.
+                        Defaults to inputfile with ".tiny" inserted before the
                         file type extension
 ```
 
