@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 import requests
+import os
 import sys
 
-API_KEY = '<YOUR KEY GOES HERE>'
+with open(os.environ['HOME'] + "/.tinypng_api_key", 'r') as f:
+    API_KEY = f.readline().strip()
 
 def status(text):
     print(text, end='', flush=True)
