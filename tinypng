@@ -4,6 +4,14 @@ import requests
 import os
 import sys
 
+PROGRESS_BAR_LENGTH = 20
+
+def rotator(states):
+    state = 0
+    while True:
+        yield states[state]
+        state = (state + 1) % len(states)
+
 try:
     with open(os.environ['HOME'] + "/.tinypng_api_key", 'r') as f:
         API_KEY = f.readline().strip()
@@ -13,11 +21,34 @@ except FileNotFoundError:
     print("Place it in $HOME/.tinypng_api_key then run this command again")
     sys.exit(1)
 
+def humanify(_bytes):
+    units = 'B,KB,MB,GB,TB,PB,EB,ZB'.split(',')
+    factor = 0
+
+    while _bytes > 1024:
+        _bytes = _bytes / 1024
+        factor = factor + 1
+
+    return "{}{}".format(round(_bytes, 1), units[factor])
+
 def status(text):
     print(text, end='', flush=True)
 
 def status_nl(text):
     print(text, flush=True)
+
+rotate = rotator('|/-\\')
+def status_bar(ratio):
+    rotator = rotate.__next__() if ratio < 1 else '✓'
+    bar_length = int(ratio * PROGRESS_BAR_LENGTH)
+    bar_remainder = PROGRESS_BAR_LENGTH - bar_length
+    percent = round(ratio * 100, 3)
+    status('\rDownloading {} [{}{}] {}%     '.format(rotator,
+                                                     '=' * bar_length,
+                                                     ' ' * bar_remainder,
+                                                     percent))
+    if ratio is 1:
+        status_nl('')
 
 def upload(inputfile):
     status("Uploading...")
@@ -27,23 +58,30 @@ def upload(inputfile):
                              data=f)
 
 def download(url, outputfile):
-    status("Downloading...")
+    status_bar(0)
     dl = requests.get(url, stream=True)
+
+    size_total = int(dl.headers['content-length'])
+    size_downloaded = 0
 
     with open(outputfile, 'wb') as f:
         for chunk in dl.iter_content(chunk_size=1024):
-            status(".")
+            size_downloaded = size_downloaded + len(chunk)
+            status_bar(size_downloaded / size_total)
             if chunk:
                 f.write(chunk)
+    status_bar(1)
 
 def print_upload_success(json):
+    ratio = round(float(json['output']['ratio']) * 100, 3)
+    input_human = humanify(json['input']['size'])
+    output_human = humanify(json['output']['size'])
     status_nl("Finished.")
-    status_nl("Compression: {}% ({}B → {}B)".format(json['output']['ratio'],
-                                                    json['input']['size'],
-                                                    json['output']['size']))
+    status_nl("Compression: {}% ({} →  {})".format(ratio,
+                                                    input_human,
+                                                    output_human))
 
 def print_download_success(outputfile):
-    status_nl("Finished.")
     status_nl("Wrote tinified image to {}".format(outputfile))
 
 def print_fail_and_exit(response):
