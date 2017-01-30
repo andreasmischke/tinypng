@@ -4,8 +4,14 @@ import requests
 import os
 import sys
 
-with open(os.environ['HOME'] + "/.tinypng_api_key", 'r') as f:
-    API_KEY = f.readline().strip()
+try:
+    with open(os.environ['HOME'] + "/.tinypng_api_key", 'r') as f:
+        API_KEY = f.readline().strip()
+except FileNotFoundError:
+    print("You need to obtain a API key from tinypng.com first.")
+    print("Go to https://tinypng.com/developers to get one.")
+    print("Place it in $HOME/.tinypng_api_key then run this command again")
+    sys.exit(1)
 
 def status(text):
     print(text, end='', flush=True)
