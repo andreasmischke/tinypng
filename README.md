@@ -9,17 +9,10 @@ and [requests](http://docs.python-requests.org/en/master/user/install/#install) 
 
 Then clone this repository or download just the tinypng file.
 
-[Get an API Key from tinypng.com](https://tinypng.com/developers) and enter it in the tinypng file:
+[Get an API Key from tinypng.com](https://tinypng.com/developers) and put it in .tinypng_api_key in your home directory:
 
-```python
-#!/usr/bin/env python3
-import argparse
-import requests
-import sys
-
-API_KEY = '<YOUR KEY GOES HERE>'
-
-...
+```bash
+/home/$USER/.tinypng_api_key
 ```
 
 Add the file to your PATH environment variable and use it!
